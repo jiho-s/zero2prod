@@ -20,6 +20,17 @@ serde = { version = "1.0.152", features = ["derive"] }
 
 # Dev Dependencies are used exclusively when running tests or examples
 # They do not get incuded in the final application binary!
+
+# Core
+[dependencies.sea-orm]
+version = "0.10.7"
+features = [
+    "debug-print",
+    "runtime-async-std-native-tls",
+    "sqlx-postgres",
+    "macros"
+]
+
 [dev-dependencies]
 reqwest = "0.11.13"
 
