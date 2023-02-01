@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+members = [".", "migration"]
+
 
 [lib]
 path = "src/lib.rs"
@@ -14,10 +17,11 @@ name = "zero2prod"
 
 
 [dependencies]
+config = "0.13.3"
 actix-web = "4.2.1"
 tokio = { version = "1.24.1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0.152", features = ["derive"] }
-
+migration = { path = "migration" }
 # Dev Dependencies are used exclusively when running tests or examples
 # They do not get incuded in the final application binary!
 

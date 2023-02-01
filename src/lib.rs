@@ -6,6 +6,7 @@ use actix_web::dev::Server;
 pub mod configurations;
 pub mod routes;
 pub mod startup;
+pub mod entity;
 
 #[derive(serde::Deserialize)]
 struct FormData {
