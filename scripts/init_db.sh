@@ -37,7 +37,7 @@ then
     exit 1
   fi
   # Launch postgres using Docker
-  docker run \
+  podman run \
       -e POSTGRES_USER=${DB_USER} \
       -e POSTGRES_PASSWORD=${DB_PASSWORD} \
       -e POSTGRES_DB=${DB_NAME} \
