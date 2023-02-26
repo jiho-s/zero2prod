@@ -96,7 +96,7 @@ async fn subscribe_returns_a_200_for_valid_from_data() {
     let configuration = get_configuration().expect("Failed to read configuration");
     let connection_string = configuration.database.connection_string();
 
-    let mut connection = PgConnection::connect(&connection_string)
+    let mut connection = PgConnection::connect(&connection_string.expose_secret())
         .await
         .expect("failed to connect to Postgres");
 
