@@ -69,5 +69,3 @@ pub async fn insert_subscriber(
     })?;
     Ok(())
 }
-
-pub
