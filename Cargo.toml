@@ -54,6 +54,7 @@ features = ["json", "rustls-tls"]
 # They do not get incuded in the final application binary!
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }
+serde_json = "1"
 wiremock = "0.5"
 quickcheck = "0.9.2"
 quickcheck_macros = "0.9.1"
