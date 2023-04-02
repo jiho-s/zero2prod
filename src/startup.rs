@@ -3,6 +3,7 @@ use std::net::TcpListener;
 
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
+use actix_web::web::Data;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
@@ -63,6 +64,7 @@ pub fn run(
     email_client: EmailClient,
 ) -> Result<Server, Error> {
     let db_pool = web::Data::new(connection_pool);
+    let email_client = Data::new(email_client);
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
