@@ -2,8 +2,8 @@ use std::io::Error;
 use std::net::TcpListener;
 
 use actix_web::dev::Server;
-use actix_web::{web, App, HttpServer};
 use actix_web::web::Data;
+use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
@@ -38,7 +38,12 @@ impl Application {
         );
         let listener = TcpListener::bind(&address)?;
         let port = listener.local_addr().unwrap().port();
-        let server = run(listener, connection_pool, email_client)?;
+        let server = run(
+            listener,
+            connection_pool,
+            email_client,
+            configuration.application.base_url,
+        )?;
 
         Ok(Self { port, server })
     }
@@ -58,13 +63,17 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_lazy_with(configuration.with_db())
 }
 
+pub struct ApplicationBaseUrl(pub String);
+
 pub fn run(
     listener: TcpListener,
     connection_pool: PgPool,
     email_client: EmailClient,
+    base_url: String,
 ) -> Result<Server, Error> {
     let db_pool = web::Data::new(connection_pool);
     let email_client = Data::new(email_client);
+    let base_url = Data::new(base_url);
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
@@ -73,6 +82,7 @@ pub fn run(
             .route("/subscriptions/confirm", web::get().to(confirm))
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
+            .app_data(base_url.clone())
     })
     .listen(listener)?
     .run();
