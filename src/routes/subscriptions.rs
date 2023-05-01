@@ -1,14 +1,16 @@
+use std::convert::{TryFrom, TryInto};
+use std::fmt::{Display, Formatter, write};
+
+use actix_web::{HttpResponse, ResponseError, web};
+use chrono::Utc;
+use rand::{Rng, thread_rng};
+use rand::distributions::Alphanumeric;
+use sqlx::{PgPool, Postgres, Transaction};
+use uuid::Uuid;
+
 use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 use crate::email_client::EmailClient;
 use crate::startup::ApplicationBaseUrl;
-use actix_web::{web, HttpResponse, ResponseError};
-use chrono::Utc;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
-use sqlx::{PgPool, Postgres, Transaction};
-use std::convert::{TryFrom, TryInto};
-use std::fmt::{Display, Formatter, write};
-use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -54,8 +56,7 @@ pub async fn subscribe(
         Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
     };
     let subscription_token = generate_subscription_token();
-    store_token(&mut transaction, subscriber_id, &subscription_token)
-        .await?;
+    store_token(&mut transaction, subscriber_id, &subscription_token).await?;
     if transaction.commit().await.is_err() {
         return Ok(HttpResponse::InternalServerError().finish());
     }
@@ -65,8 +66,8 @@ pub async fn subscribe(
         &base_url.0,
         &subscription_token,
     )
-        .await
-        .is_err()
+    .await
+    .is_err()
     {
         return Ok(HttpResponse::InternalServerError().finish());
     }
@@ -82,8 +83,8 @@ fn generate_subscription_token() -> String {
 }
 
 #[tracing::instrument(
-name = "Send a confirmation email to a new subscriber",
-skip(email_client, new_subscriber, base_url, subscription_token)
+    name = "Send a confirmation email to a new subscriber",
+    skip(email_client, new_subscriber, base_url, subscription_token)
 )]
 pub async fn send_confirmation_email(
     email_client: &EmailClient,
@@ -109,8 +110,8 @@ pub async fn send_confirmation_email(
 }
 
 #[tracing::instrument(
-name = "Saving new subscriber details in the database",
-skip(new_subscriber, transaction)
+    name = "Saving new subscriber details in the database",
+    skip(new_subscriber, transaction)
 )]
 pub async fn insert_subscriber(
     transaction: &mut Transaction<'_, Postgres>,
@@ -127,18 +128,18 @@ pub async fn insert_subscriber(
         new_subscriber.name.as_ref(),
         Utc::now()
     )
-        .execute(transaction)
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to execute query: {:?}", e);
-            e
-        })?;
+    .execute(transaction)
+    .await
+    .map_err(|e| {
+        tracing::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
     Ok(subscriber_id)
 }
 
 #[tracing::instrument(
-name = "Store subscription token in the database",
-skip(subscription_token, transaction)
+    name = "Store subscription token in the database",
+    skip(subscription_token, transaction)
 )]
 pub async fn store_token(
     transaction: &mut Transaction<'_, Postgres>,
@@ -153,18 +154,27 @@ pub async fn store_token(
         subscription_token,
         subscriber_id
     )
-        .execute(transaction)
-        .await
-        .map_err(StoreTokenError)?;
+    .execute(transaction)
+    .await
+    .map_err(StoreTokenError)?;
     Ok(())
 }
 
-#[derive(Debug)]
 pub struct StoreTokenError(sqlx::Error);
 
-impl ResponseError for StoreTokenError {
-
+impl std::error::Error for StoreTokenError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
 }
+
+impl std::fmt::Debug for StoreTokenError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}\nCased by:\n\t{}", self, self.0)
+    }
+}
+
+impl ResponseError for StoreTokenError {}
 
 impl Display for StoreTokenError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
