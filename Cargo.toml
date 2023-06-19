@@ -31,6 +31,8 @@ serde = { version = "1.0.152", features = ["derive"] }
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4.22", default-features = false, fetures = ["clock"] }
 rand = { version = "0.8", features=["std_rng"] }
+thiserror = "1.0.40"
+anyhow = "1.0.71"
 
 [dependencies.sqlx]
 version = "0.6"
