@@ -33,7 +33,7 @@ chrono = { version = "0.4.22", default-features = false, fetures = ["clock"] }
 rand = { version = "0.8", features=["std_rng"] }
 thiserror = "1.0.40"
 anyhow = "1.0.71"
-base64 = "0.21.2"
+base64 = "0.21.4"
 
 [dependencies.sqlx]
 version = "0.6"
