@@ -28,7 +28,7 @@ pub struct TestApp {
     pub port: u16,
     pub db_pool: PgPool,
     pub email_server: MockServer,
-    test_user: TestUser,
+    pub(crate) test_user: TestUser,
 }
 
 /// Confirmation links embedded in the request to the email API.
